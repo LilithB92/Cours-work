@@ -132,9 +132,33 @@ def top_transactions_by_paymant(df: pd.DataFrame, limit: int = 5) -> list[dict[A
         return [{}]
 
 
+def stoke_price() -> list[dict]:
+    """
+     Функция обращает к внешнему API (https://api-ninjas.com/api/stockprice) для получения
+     стоимость акций из S&P500 ("AAPL", "AMZN", "GOOGL", "MSFT", "TSLA").
+
+    :return: Список словарей тикерами и их ценами
+    """
+    try:
+        logger.info("Oбращаем к внешнему API для получения стоимость акций из S&P500")
+        stock_prices = []
+        tickers = ["AAPL", "AMZN", "GOOGL", "MSFT", "TSLA"]
+        url = "https://api.api-ninjas.com/v1/stockprice"
+        headers = {"X-Api-Key": x_api_key}
+        for ticker in tickers:
+            payload: Dict[str, str] = {"ticker": ticker}
+            response = requests.get(url, headers=headers, params=payload)
+            stock_prices.append({"stock": ticker, "price": response.json()["price"]})
+        return stock_prices
+    except Exception as ex:
+        logger.error(f"Ошибка получение стоимость акций из S&P500: {ex}")
+        return [{}]
+
+
 if __name__ == "__main__":
     print(get_greeting())
     # print(get_month_period("2021-12-30 08:16:00"))
-    trans = read_excel("operations")
-    print(top_transactions_by_paymant(trans))
+    # trans = read_excel("operations")
+    # print(top_transactions_by_paymant(trans))
+    print(stoke_price())
     # print(get_race_currency())
