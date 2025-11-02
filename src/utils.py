@@ -3,6 +3,7 @@ import logging
 import os.path
 from pathlib import Path
 
+import pandas as pd
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -58,6 +59,18 @@ def get_month_period(date_time: str) -> list[str]:
     return [first_day_of_month.strftime(to_formated_date), dt.strftime(to_formated_date)]
 
 
+def read_excel(filename: str) -> pd.DataFrame:
+    excel_file = os.path.join(directory_name, "data", filename + ".xlsx")
+    try:
+        logger.info("Открываем Excel-файл с данными о финансовых транзакциях и вернет DataFrame")
+        excel_data = pd.read_excel(excel_file, engine="openpyxl")
+        return excel_data
+    except FileNotFoundError as ex:
+        logger.error(f"Произошла ошибка: {ex}")
+        return pd.DataFrame()
+
+
 if __name__ == "__main__":
     print(get_greeting())
-    print(get_month_period("2021-12-30 08:16:00"))
+    # print(get_month_period("2021-12-30 08:16:00"))
+    print(read_excel("po"))
