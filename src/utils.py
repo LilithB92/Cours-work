@@ -64,6 +64,12 @@ def get_month_period(date_time: str) -> list[str]:
 
 
 def read_excel(filename: str) -> pd.DataFrame:
+    """
+
+
+    :param filename:
+    :return:
+    """
     excel_file = os.path.join(directory_name, "data", filename + ".xlsx")
     try:
         logger.info("Открываем Excel-файл с данными о финансовых транзакциях и вернет DataFrame")
@@ -88,7 +94,7 @@ def get_race_currency() -> list[dict]:
         for currency in currencies:
             url = "https://api.apilayer.com/exchangerates_data/convert"
             headers = {"apikey": api_key}
-            payload:  Dict[str, Any] = {"amount": 1, "from": currency, "to": "RUB"}
+            payload: Dict[str, Any] = {"amount": 1, "from": currency, "to": "RUB"}
             response = requests.get(url, headers=headers, params=payload)
             if response.status_code == 200:
                 rate.append({"currency": currency, "rate": round(response.json()["result"], 2)})
@@ -98,8 +104,37 @@ def get_race_currency() -> list[dict]:
         return [{}]
 
 
+def top_transactions_by_paymant(df: pd.DataFrame, limit: int = 5) -> list[dict[Any, Any]]:
+    """
+    Функция принимает датафрейм транзакций по сумме платежа, топ число трансакции.Она возвращает tоп-лимит транзакции.
+
+    :param df: Транзакции по сумме платежа
+    :param limit: Лимит топ числа
+    :return: Топ-5 транзакций по сумме платежа
+    """
+    try:
+        logger.info("Получаем топ-5 транзакции по сумме платежа")
+        indexes_of_top_trans = df["Сумма операции с округлением"].nlargest(limit).keys()
+        logger.info(f"Получаем индекса топ-5 транзакции : {indexes_of_top_trans}")
+        top_transactions = []
+        for index in indexes_of_top_trans:
+            top_transactions.append(
+                {
+                    "date": df["Дата платежа"][index],
+                    "amount": float(df["Сумма операции"][index]),
+                    "category": df["Категория"][index],
+                    "description": df["Описание"][index],
+                }
+            )
+        return top_transactions
+    except Exception as ex:
+        logger.error(f"Ошибка получение топ-5 транзакции: {ex}")
+        return [{}]
+
+
 if __name__ == "__main__":
     print(get_greeting())
     # print(get_month_period("2021-12-30 08:16:00"))
-    # print(read_excel("po"))
+    trans = read_excel("operations")
+    print(top_transactions_by_paymant(trans))
     # print(get_race_currency())
