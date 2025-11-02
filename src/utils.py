@@ -2,9 +2,13 @@ import datetime
 import logging
 import os.path
 from pathlib import Path
+from typing import Any
+from typing import Dict
 
 import pandas as pd
+import requests
 from dotenv import load_dotenv
+from requests import JSONDecodeError
 
 load_dotenv()
 api_key = os.getenv("API_KEY")
@@ -70,7 +74,32 @@ def read_excel(filename: str) -> pd.DataFrame:
         return pd.DataFrame()
 
 
+def get_race_currency() -> list[dict]:
+    """
+    Функция обращает к внешнему API (https://apilayer.com/marketplace/exchangerates_data-api)
+    для получения текущего курса валют "EUR" и "USD" в рублях
+
+    :return: список словарей с валютами и курсами валют
+    """
+    currencies = ["EUR", "USD"]
+    rate = []
+    try:
+        logger.info("Oбращаем к внешнему API ля получения текущего курса валют EUR и USD в рублях")
+        for currency in currencies:
+            url = "https://api.apilayer.com/exchangerates_data/convert"
+            headers = {"apikey": api_key}
+            payload:  Dict[str, Any] = {"amount": 1, "from": currency, "to": "RUB"}
+            response = requests.get(url, headers=headers, params=payload)
+            if response.status_code == 200:
+                rate.append({"currency": currency, "rate": round(response.json()["result"], 2)})
+        return rate
+    except (JSONDecodeError, TypeError, KeyError, ValueError, AssertionError) as ex:
+        logger.error(f"Ошибка получение курс валют: {ex}")
+        return [{}]
+
+
 if __name__ == "__main__":
     print(get_greeting())
     # print(get_month_period("2021-12-30 08:16:00"))
-    print(read_excel("po"))
+    # print(read_excel("po"))
+    # print(get_race_currency())
