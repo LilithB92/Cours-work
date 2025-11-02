@@ -44,5 +44,20 @@ def get_greeting() -> str:
     return f"Добр{greet}"
 
 
+def get_month_period(date_time: str) -> list[str]:
+    """
+    Функция меняет формат даты и фильтрует от начала месяца до указанного числа
+    :param date_time: Дата в формате YYYY-MM-DD HH:MM:SS
+    :return:список из дат начала месяца и указанного числа месяца
+    """
+    from_format_date = "%Y-%m-%d %H:%M:%S"
+    to_formated_date = "%d.%m.%Y %H:%M:%S"
+    logger.info("настройка интервала дат от 1 числа месяца до указанного")
+    dt = datetime.datetime.strptime(date_time, from_format_date)
+    first_day_of_month = dt.replace(day=1)
+    return [first_day_of_month.strftime(to_formated_date), dt.strftime(to_formated_date)]
+
+
 if __name__ == "__main__":
     print(get_greeting())
+    print(get_month_period("2021-12-30 08:16:00"))
