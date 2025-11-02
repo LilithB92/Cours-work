@@ -13,6 +13,7 @@ def get_page_main_datas(date: str)->pd.DataFrame():
    :return:  JSON-ответ
    """
    greeting = get_greeting()
+   
 
 
 def for_page_event(data_frame):
