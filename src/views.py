@@ -1,5 +1,4 @@
 import json
-from typing import Any
 
 import pandas as pd
 
@@ -22,13 +21,12 @@ def get_page_main_datas(date: str) -> str:
     :return:
      JSON-ответ
     """
-    transactions = read_excel("operations")
+    tr = read_excel("operations")
     month_period = get_month_period(date)
-    start_of_period = month_period[0][:10]
-    end_of_period = month_period[1][:10]
 
-    filtered_df = transactions[
-        (transactions["Дата платежа"] >= start_of_period) & (transactions["Дата платежа"] <= end_of_period)
+    filtered_df = tr[
+        (pd.to_datetime(tr["Дата операции"], dayfirst=True) >= pd.to_datetime(month_period[0], dayfirst=True))
+        & (pd.to_datetime(tr["Дата операции"], dayfirst=True) <= pd.to_datetime(month_period[1], dayfirst=True))
     ]
 
     greeting = get_greeting()
@@ -45,7 +43,6 @@ def get_page_main_datas(date: str) -> str:
         "stock_prices": stock_prices,
     }
     return json.dumps(data, ensure_ascii=False, indent=4)
-
 
 
 if __name__ == "__main__":

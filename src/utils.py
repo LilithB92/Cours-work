@@ -192,6 +192,6 @@ if __name__ == "__main__":
     # print(get_month_period("2021-12-30 08:16:00"))
     trans = read_excel("operations")
     # print(top_transactions_by_paymant(trans))
-    # print(stoke_price())
+    print(stoke_price())
     # print(get_race_currency())
     print(get_each_cards_datas(trans))
