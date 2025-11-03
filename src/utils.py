@@ -65,10 +65,10 @@ def get_month_period(date_time: str) -> list[str]:
 
 def read_excel(filename: str) -> pd.DataFrame:
     """
+    Функция читает финансовых операций из Excel и возврашает DataFrame с транзакциями.
 
-
-    :param filename:
-    :return:
+    :param filename:Имя файла Excel
+    :return:DataFrame с транзакциями.
     """
     excel_file = os.path.join(directory_name, "data", filename + ".xlsx")
     try:
@@ -80,7 +80,39 @@ def read_excel(filename: str) -> pd.DataFrame:
         return pd.DataFrame()
 
 
-def get_race_currency() -> list[dict]:
+def get_each_cards_datas(df: pd.DataFrame) -> list[dict]:
+    """
+    Функция принимает DataFrame с транзакциями и возврашает список словарей:
+    По каждой карте: последние 4 цифры карты;
+    общая сумма расходов;
+    кешбэк (1 рубль на каждые 100 рублей).
+
+    :param df:DataFrame с транзакциями
+    :return:список словарей
+    """
+    try:
+
+        card_datas = []
+        card_numbers = df["Номер карты"].dropna().unique()
+        logger.info(f"получение Номера карты: {card_numbers}")
+        grouped_by_card = df.groupby("Номер карты")
+        for card_number in card_numbers:
+            amount = grouped_by_card["Сумма платежа"].sum()
+            cashback = grouped_by_card["Бонусы (включая кэшбэк)"].sum()
+            card_datas.append(
+                {
+                    "last_digits": card_number,
+                    "total_spent": float(amount[card_number]),
+                    "cashback": float(cashback[card_number]),
+                }
+            )
+        return card_datas
+    except Exception as ex:
+        logger.error(f"Произошла ошибка в получение информации карты : {ex}")
+        return [{}]
+
+
+def get_rate_currency() -> list[dict]:
     """
     Функция обращает к внешнему API (https://apilayer.com/marketplace/exchangerates_data-api)
     для получения текущего курса валют "EUR" и "USD" в рублях
@@ -106,7 +138,7 @@ def get_race_currency() -> list[dict]:
 
 def top_transactions_by_paymant(df: pd.DataFrame, limit: int = 5) -> list[dict[Any, Any]]:
     """
-    Функция принимает датафрейм транзакций по сумме платежа, топ число трансакции.Она возвращает tоп-лимит транзакции.
+    Функция принимает DataFrame транзакций по сумме платежа, топ число трансакции.Она возвращает tоп-лимит транзакции.
 
     :param df: Транзакции по сумме платежа
     :param limit: Лимит топ числа
@@ -158,7 +190,8 @@ def stoke_price() -> list[dict]:
 if __name__ == "__main__":
     print(get_greeting())
     # print(get_month_period("2021-12-30 08:16:00"))
-    # trans = read_excel("operations")
+    trans = read_excel("operations")
     # print(top_transactions_by_paymant(trans))
-    print(stoke_price())
+    # print(stoke_price())
     # print(get_race_currency())
+    print(get_each_cards_datas(trans))
