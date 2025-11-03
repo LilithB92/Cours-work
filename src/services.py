@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Any
 from typing import Dict
@@ -74,14 +75,35 @@ def investment_bank(month: str, transactions: List[Dict[str, Any]], limit: int) 
             investments = [
                 (limit - (tr["Сумма операции"] % divider))
                 for tr in transactions
-                if (tr["Дата операции"][:7] == month)
-                and (0 < (limit - (tr["Сумма операции"] % divider)) < limit)
+                if (tr["Дата операции"][:7] == month) and (0 < (limit - (tr["Сумма операции"] % divider)) < limit)
             ]
             return round(float(sum(investments)), 2)
         raise Exception
     except Exception as ex:
         logger.error(f"Ошибка получение  сумму, которую нужно отложить в «Инвесткопилку»: {ex}")
         return 0.00
+
+
+def simple_search(query: str, transactions: list[dict]) -> str:
+    """
+    Функция принимает строку — запрос  для поиска и транзакции в формате списка словарей.
+    Функция  корректный JSON - ответ с транзакциями.
+
+    :param query: строку-запрос для поиска
+    :param transactions: транзакции в формате списка словарей
+    :return: JSON - ответ с транзакциями
+    """
+    try:
+        logger.info("Поиск транзакции")
+        pattern = rf"{query}"
+        results = [trans for trans in transactions if re.search(pattern, str(trans), flags=re.IGNORECASE)]
+        if not results:
+            raise Exception
+        logger.info(f"Получение транзакции:  {results}")
+        return json.dumps(results, ensure_ascii=False, indent=4)
+    except Exception as ex:
+        logger.error(f"Ошибка получение транзакции : {ex}")
+        return ""
 
 
 if __name__ == "__main__":
@@ -95,5 +117,6 @@ if __name__ == "__main__":
         {"Дата операции": "2021-05-13", "Сумма операции": 134.14},
     ]
     print(investment_bank("2021-05", data, 10))
+    print(simple_search("6", data))
 
     # print(type(raised_cashback_for_categories(trans, 2021, 5)))
