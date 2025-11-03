@@ -42,12 +42,12 @@ def raised_cashback_for_categories(transactions: list[dict], year: int, month: i
         categories = filtered_df["Категория"].dropna().unique()
         logger.info(f"получение категории: {categories}")
         sum_amount_by_category = filtered_df.groupby("Категория")["Сумма операции с округлением"].sum()
-        data = {}
+        datas = {}
         for category in categories:
             if category in ["Наличные", "Пополнения"]:
                 continue
-            data[category] = round(float(sum_amount_by_category[category]) / 100, 2)
-        return json.dumps(data, ensure_ascii=False, indent=4)
+            datas[category] = round(float(sum_amount_by_category[category]) / 100, 2)
+        return json.dumps(datas, ensure_ascii=False, indent=4)
     except Exception as ex:
         logger.error(f"Ошибка получение JSON с анализом  кешбэка: {ex}")
         return ""
@@ -89,7 +89,7 @@ def simple_search(query: str, transactions: list[dict]) -> str:
     Функция принимает строку — запрос  для поиска и транзакции в формате списка словарей.
     Функция  корректный JSON - ответ с транзакциями.
 
-    :param query: строку-запрос для поиска
+    :param query: Строку-запрос для поиска
     :param transactions: транзакции в формате списка словарей
     :return: JSON - ответ с транзакциями
     """
@@ -106,17 +106,40 @@ def simple_search(query: str, transactions: list[dict]) -> str:
         return ""
 
 
+def search_by_phonenumber(transactions: list[dict]) -> str:
+    """
+    Функция возвращает JSON со всеми транзакциями,
+    содержащими в описании мобильные номера(Я МТС +7 921 11-22-33  Тинькофф Мобайл +7 995 555-55-55).
+
+    :param transactions: транзакции в формате списка словарей
+    :return: JSON - ответ с транзакциями
+    """
+    try:
+        logger.info("Поиск транзакции по номеу телефона")
+        pattern = r"\+\d{1} \d{3} \d{2,3}(-\d{2}){2}"
+
+        results = [trans for trans in transactions if re.search(pattern, str(trans), flags=re.IGNORECASE)]
+        if not results:
+            raise Exception
+        logger.info(f"Получение транзакции:  {results}")
+        return json.dumps(results, ensure_ascii=False, indent=4)
+    except Exception as ex:
+        logger.error(f"Ошибка получение транзакции : {ex}")
+        return ""
+
+
 if __name__ == "__main__":
     # trans = read_excel("operations")
     # json_df = df.to_json(orient='records', force_ascii=False, indent = 4)
     # json_dict =json.loads(json_df)
     # print(type(json_dict))
     data = [
-        {"Дата операции": "2021-6-12", "Сумма операции": 345.96},
-        {"Дата операции": "2021-05-2", "Сумма операции": 100},
+        {"Дата операции": "2021-6-12", "Тинькофф Мобайл +7 995 555-55-55": 345.96},
+        {"+7 921 11-22-33": "2021-05-2", "Сумма операции": 100},
         {"Дата операции": "2021-05-13", "Сумма операции": 134.14},
     ]
     print(investment_bank("2021-05", data, 10))
-    print(simple_search("6", data))
+    # print(simple_search("6", data))
+    print(search_by_phonenumber(data))
 
     # print(type(raised_cashback_for_categories(trans, 2021, 5)))
