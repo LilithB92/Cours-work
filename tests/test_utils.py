@@ -9,6 +9,7 @@ from src.utils import get_each_cards_datas
 from src.utils import get_month_period
 from src.utils import get_rate_currency
 from src.utils import stock_price
+from src.utils import top_transactions_by_paymant
 
 
 def test_get_month_period() -> None:
@@ -71,3 +72,12 @@ def test_get_each_cards_datas(cards_datas_expected: list[dict], dataframe_return
 
 def test_get_each_cards_with_empty_datas() -> None:
     assert get_each_cards_datas(pd.DataFrame()) == [{}]
+
+
+def test_top_transactions_by_paymant(top_data_expected: list[dict]) -> None:
+    trans = src.utils.read_excel("operations")
+    assert top_transactions_by_paymant(trans, 2) == top_data_expected
+
+
+def test_top_transactions_by_paymant_with_empty_datas() -> None:
+    assert top_transactions_by_paymant(pd.DataFrame()) == [{}]
