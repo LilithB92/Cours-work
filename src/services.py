@@ -128,18 +128,56 @@ def search_by_phonenumber(transactions: list[dict]) -> str:
         return ""
 
 
+def search_by_name(transactions: list[dict]) -> str:
+    """
+    Функция принимает транзакции в формате списка словарей и возвращает JSON со всеми транзакциями,
+    которые относятся к переводам физлицам. Категория такой транзакции — Переводы,
+     а в описании есть имя и первая буква фамилии с точкой.
+    Например: Валерий А. Сергей З. Артем П.
+
+    :param transactions: Транзакции в формате списка словарей
+    :return: JSON со всеми транзакциями, которые относятся к переводам физ лицам
+    """
+    try:
+        logger.info("Поиск транзакции по номеу телефона")
+        pattern = r"[А-ЯЁ]{1}[а-яё]* [А-ЯЁ]{1}\."
+
+        results = [
+            trans
+            for trans in transactions
+            if (trans["Категория"] == "Переводы") and (re.search(pattern, trans["описании"], flags=re.IGNORECASE))
+        ]
+        if not results:
+            raise Exception
+        logger.info(f"Получение транзакции:  {results}")
+        return json.dumps(results, ensure_ascii=False, indent=4)
+    except Exception as ex:
+        logger.error(f"Ошибка получение транзакции : {ex}")
+        return ""
+
+
 if __name__ == "__main__":
     # trans = read_excel("operations")
     # json_df = df.to_json(orient='records', force_ascii=False, indent = 4)
     # json_dict =json.loads(json_df)
     # print(type(json_dict))
     data = [
-        {"Дата операции": "2021-6-12", "Тинькофф Мобайл +7 995 555-55-55": 345.96},
-        {"+7 921 11-22-33": "2021-05-2", "Сумма операции": 100},
-        {"Дата операции": "2021-05-13", "Сумма операции": 134.14},
+        {"Дата операции": "2021-6-12", "Сумма операции": 345.96, "Категория": "Пере", "описании": "Валерий А."},
+        {
+            "Валерий А.": "2021-05-2",
+            "Сумма операции": 100,
+            "Категория": "Переводы",
+            "описании": "Тинькофф Мобайл +7 995 555-55-55 А. Сергей З.",
+        },
+        {
+            "Дата операции": "2021-05-13",
+            "Сумма операции": 134.14,
+            "Категория": "Переводы",
+            "описании": "Тинькофф Валерий А. Мобайл +7 995 555-55-55 ",
+        },
     ]
-    print(investment_bank("2021-05", data, 10))
+    # print(investment_bank("2021-05", data, 10))
     # print(simple_search("6", data))
-    print(search_by_phonenumber(data))
+    print(search_by_name(data))
 
     # print(type(raised_cashback_for_categories(trans, 2021, 5)))
