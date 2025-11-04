@@ -1,11 +1,14 @@
 from typing import Any
 from unittest.mock import patch
 
+import pandas as pd
 from freezegun import freeze_time
 
 import src.utils
+from src.utils import get_each_cards_datas
 from src.utils import get_month_period
 from src.utils import get_rate_currency
+from src.utils import stock_price
 
 
 def test_get_month_period() -> None:
@@ -46,3 +49,25 @@ def test_get_rate_currency_(mocked_get: Any) -> None:
     mocked_get.return_value.json.return_value = {"result": 70.24}
     result = get_rate_currency()
     assert result == [{"currency": "EUR", "rate": 70.24}, {"currency": "USD", "rate": 70.24}]
+
+
+@patch("src.utils.requests.get")
+def test_stock_price_invalid(mocked_get: Any) -> None:
+    mocked_get.return_value.json.return_value = {}
+    result = stock_price()
+    assert result == [{}]
+
+
+@patch("src.utils.requests.get")
+def test_stock_price(mocked_get: Any, stock_price_expected: list[dict]) -> None:
+    mocked_get.return_value.json.return_value = {"price": 70.24, "stock": "AMZN"}
+    result = stock_price()
+    assert result == stock_price_expected
+
+
+def test_get_each_cards_datas(cards_datas_expected: list[dict], dataframe_returner: pd.DataFrame) -> None:
+    assert get_each_cards_datas(dataframe_returner) == cards_datas_expected
+
+
+def test_get_each_cards_with_empty_datas() -> None:
+    assert get_each_cards_datas(pd.DataFrame()) == [{}]

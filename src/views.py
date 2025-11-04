@@ -7,7 +7,7 @@ from src.utils import get_greeting
 from src.utils import get_month_period
 from src.utils import get_rate_currency
 from src.utils import read_excel
-from src.utils import stoke_price
+from src.utils import stock_price
 from src.utils import top_transactions_by_paymant
 
 
@@ -31,7 +31,7 @@ def get_page_main_datas(date: str) -> str:
 
     greeting = get_greeting()
     currency_rates = get_rate_currency()
-    stock_prices = stoke_price()
+    stock_prices = stock_price()
     top_transactions = top_transactions_by_paymant(filtered_df)
     cards = get_each_cards_datas(filtered_df)
 

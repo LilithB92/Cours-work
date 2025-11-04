@@ -163,7 +163,7 @@ def top_transactions_by_paymant(df: pd.DataFrame, limit: int = 5) -> list[dict[A
         return [{}]
 
 
-def stoke_price() -> list[dict]:
+def stock_price() -> list[dict]:
     """
      Функция обращает к внешнему API (https://api-ninjas.com/api/stockprice) для получения
      стоимость акций из S&P500 ("AAPL", "AMZN", "GOOGL", "MSFT", "TSLA").
@@ -194,3 +194,4 @@ if __name__ == "__main__":
     # print(stoke_price())
     # print(get_race_currency())
     # print(get_each_cards_datas(trans))
+
