@@ -10,7 +10,7 @@ from typing import List
 import pandas as pd
 
 directory_name = Path(__file__).resolve().parent.parent
-log_path = os.path.join(directory_name, "logs", "utils.log")
+log_path = os.path.join(directory_name, "logs", "services.log")
 
 logging.basicConfig(
     filename=log_path,
