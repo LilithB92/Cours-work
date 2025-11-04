@@ -3,6 +3,7 @@ import json
 import logging
 import os
 from functools import wraps
+from itertools import groupby
 from pathlib import Path
 from typing import Any
 from typing import Callable
@@ -54,6 +55,27 @@ def log(filename: str = "user_settings") -> Callable[..., Any]:
 
     return wrapper
 
+def filtered_by_date(df: pd.DataFrame, date:Optional[str] = None)->pd.DataFrame:
+    """
+    Функция принимает датафрейм с транзакциями, категории, дату.
+    Функция филтрует транзакции за последние три месяца (от переданной даты
+
+    :param df: датафрейм с транзакциями
+    :param date: опциональную дату в формате 'dd.mm.YYYY'
+    :return: транзакции за последние три месяца (от переданной даты)
+    """
+    df["Дата платежа"] = pd.to_datetime(df["Дата платежа"], format="%d.%m.%Y")
+    date_format = "%d.%m.%Y"
+    if not date:
+        date = datetime.datetime.now().strftime(date_format)
+    dt = datetime.datetime.strptime(date, date_format)
+    logger.info(f"получение даты: {dt}")
+    past_datetime = dt - relativedelta(months=3)
+    filtered_by_date = df[(df["Дата платежа"] >= past_datetime) & (df["Дата платежа"] <= dt)]
+
+    return filtered_by_date
+
+
 
 def spending_by_category(df: pd.DataFrame, category: str, date: Optional[str] = None) -> pd.DataFrame:
     """
@@ -67,27 +89,47 @@ def spending_by_category(df: pd.DataFrame, category: str, date: Optional[str] = 
     :return: траты по заданной категории за последние три месяца (от переданной даты)
     """
     try:
-        df["Дата платежа"] = pd.to_datetime(df["Дата платежа"], format="%d.%m.%Y")
-        date_format = "%d.%m.%Y"
-        if not date:
-            date = datetime.datetime.now().strftime(date_format)
-        dt = datetime.datetime.strptime(date, date_format)
-        logger.info(f"получение даты: {dt}")
-        past_datetime = dt - relativedelta(months=3)
-        filtered_by_date = df[(df["Дата платежа"] >= past_datetime) & (df["Дата платежа"] <= dt)]
-        filter_category = filtered_by_date[filtered_by_date["Категория"] == category]
+        date_df = filtered_by_date(df,date)
+        filter_category = date_df[date_df["Категория"] == category]
         logger.info("получение траты по заданной категории за последние три месяца")
         return filter_category[["Дата платежа", "Категория", "Сумма платежа"]]
     except Exception as ex:
         logger.error(f"Ошибка получение траты по заданной категории за последние три месяца: {ex}")
         return pd.DataFrame()
 
+def spending_by_weekday(df: pd.DataFrame, date: Optional[str] = None) -> pd.DataFrame:
+    """
+     Функция принимает датафрейм с транзакциями,  дату.
+    Функция возвращает средние траты в каждый из дней недели за последние три месяца (от переданной даты)
+    Если дата не передана, то берется текущая дата.
+
+    :param df:датафрейм с транзакциями
+    :param date:опциональную дату в формате 'dd.mm.YYYY'
+    :return: Функция возвращает средние траты в каждый из дней недели за последние три месяца (от переданной даты)
+    """
+    data = []
+    filter_df = filtered_by_date(df,date)
+    weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    # filter_df['weekday'] = filter_df['Дата платежа'].dt.day_name()
+    # new_df = filter_df[['Дата платежа','weekday','Сумма платежа']]
+    # new = new_df.groupby('weekday')['Сумма платежа']
+    #
+    #
+    # # filter_df.loc[filter_df['Дата платежа'], 'weekday'] = filter_df['Дата платежа'].dt.day_name()
+    #
+    # # for weekday in weekdays:
+    # #
+    # #     filtered = filter_df[filter_df['Дата платежа'].dt.day_name() == weekday]
+    # #     # if filtered:
+    # #     #     data.appened({weekday: float(filtered['"Сумма платежа"'].mean())})
+    #
+    #
+    # # print(filter_df['Дата платежа'].dt.day_name() == "Sunday")
+    # return new
+
+
 
 if __name__ == "__main__":
     dtf = read_excel("operations")
-    print(
-        spending_by_category(
-            dtf,
-            "Супермаркеты",
-        )
-    )
+    print(spending_by_category(dtf,"Супермаркеты",'21.03.2021' ))
+    print(spending_by_weekday(dtf,'21.03.2021' ))
