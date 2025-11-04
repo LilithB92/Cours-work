@@ -70,12 +70,12 @@ def read_excel(filename: str) -> pd.DataFrame:
     :param filename:Имя файла Excel
     :return:DataFrame с транзакциями.
     """
-    excel_file = os.path.join(directory_name, "data", filename + ".xlsx")
     try:
+        excel_file = os.path.join(directory_name, "data", filename + ".xlsx")
         logger.info("Открываем Excel-файл с данными о финансовых транзакциях и вернет DataFrame")
         excel_data = pd.read_excel(excel_file, engine="openpyxl")
         return excel_data
-    except FileNotFoundError as ex:
+    except (FileNotFoundError, ValueError, AttributeError ) as ex:
         logger.error(f"Произошла ошибка: {ex}")
         return pd.DataFrame()
 
@@ -91,7 +91,6 @@ def get_each_cards_datas(df: pd.DataFrame) -> list[dict]:
     :return:список словарей
     """
     try:
-
         card_datas = []
         card_numbers = df["Номер карты"].dropna().unique()
         logger.info(f"получение Номера карты: {card_numbers}")
@@ -188,10 +187,10 @@ def stoke_price() -> list[dict]:
 
 
 if __name__ == "__main__":
-    print(get_greeting())
-    # print(get_month_period("2021-12-30 08:16:00"))
-    trans = read_excel("operations")
+    # print(get_greeting())
+    print(get_month_period("2021-12-30 08:16:00"))
+    # trans = read_excel("operations")
     # print(top_transactions_by_paymant(trans))
-    print(stoke_price())
+    # print(stoke_price())
     # print(get_race_currency())
-    print(get_each_cards_datas(trans))
+    # print(get_each_cards_datas(trans))

@@ -26,6 +26,10 @@ lint = [
     "isort (>=7.0.0,<8.0.0)",
     "mypy (>=1.18.2,<2.0.0)"
 ]
+dev = [
+    "pytest-cov (>=7.0.0,<8.0.0)",
+    "mock (>=5.2.0,<6.0.0)"
+]
 
 [tool.black]
 line-length = 119
