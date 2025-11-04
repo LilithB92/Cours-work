@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 import os
@@ -5,6 +6,12 @@ from functools import wraps
 from pathlib import Path
 from typing import Any
 from typing import Callable
+from typing import Optional
+
+import pandas as pd
+from dateutil.relativedelta import relativedelta
+
+from src.utils import read_excel
 
 directory_name = Path(__file__).resolve().parent.parent
 log_path = os.path.join(directory_name, "logs", "reports.log")
@@ -46,3 +53,41 @@ def log(filename: str = "user_settings") -> Callable[..., Any]:
         return inner
 
     return wrapper
+
+
+def spending_by_category(df: pd.DataFrame, category: str, date: Optional[str] = None) -> pd.DataFrame:
+    """
+    Функция принимает датафрейм с транзакциями, категории, дату.
+    Функция филтрует траты по заданной категории за последние три месяца (от переданной даты
+    Если дата не передана, то берется текущая дата.
+
+    :param df: датафрейм с транзакциями,
+    :param category: название категории
+    :param date: опциональную дату в формате 'dd.mm.YYYY'.
+    :return: траты по заданной категории за последние три месяца (от переданной даты)
+    """
+    try:
+        df["Дата платежа"] = pd.to_datetime(df["Дата платежа"], format="%d.%m.%Y")
+        date_format = "%d.%m.%Y"
+        if not date:
+            date = datetime.datetime.now().strftime(date_format)
+        dt = datetime.datetime.strptime(date, date_format)
+        logger.info(f"получение даты: {dt}")
+        past_datetime = dt - relativedelta(months=3)
+        filtered_by_date = df[(df["Дата платежа"] >= past_datetime) & (df["Дата платежа"] <= dt)]
+        filter_category = filtered_by_date[filtered_by_date["Категория"] == category]
+        logger.info("получение траты по заданной категории за последние три месяца")
+        return filter_category[["Дата платежа", "Категория", "Сумма платежа"]]
+    except Exception as ex:
+        logger.error(f"Ошибка получение траты по заданной категории за последние три месяца: {ex}")
+        return pd.DataFrame()
+
+
+if __name__ == "__main__":
+    dtf = read_excel("operations")
+    print(
+        spending_by_category(
+            dtf,
+            "Супермаркеты",
+        )
+    )
