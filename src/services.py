@@ -49,9 +49,9 @@ def raised_cashback_for_categories(transactions: list[dict], year: int, month: i
                 continue
             datas[category] = round(float(sum_amount_by_category[category]) / 100, 2)
         return json.dumps(datas, ensure_ascii=False, indent=4)
-    except Exception as ex:
+    except (ValueError, KeyError,TypeError,JSONDecodeError) as ex:
         logger.error(f"Ошибка получение JSON с анализом  кешбэка: {ex}")
-        return ""
+        return "some"
 
 
 def investment_bank(month: str, transactions: List[Dict[str, Any]], limit: int) -> float:
@@ -68,19 +68,19 @@ def investment_bank(month: str, transactions: List[Dict[str, Any]], limit: int) 
     :return: сумму, которую удалось бы отложить в «Инвесткопилку»
     """
     try:
-        if transactions:
-            logger.info("Округление трат")
-            divider = 10
-            if limit > 10:
-                divider = 100
-            investments = [
-                (limit - (tr["Сумма операции"] % divider))
-                for tr in transactions
-                if (tr["Дата операции"][:7] == month) and (0 < (limit - (tr["Сумма операции"] % divider)) < limit)
-            ]
-            return round(float(sum(investments)), 2)
-        raise Exception
-    except Exception as ex:
+
+        logger.info("Округление трат")
+        divider = 10
+        if limit > 10:
+            divider = 100
+        investments = [
+            (limit - (tr["Сумма операции"] % divider))
+            for tr in transactions
+            if (tr["Дата операции"][:7] == month) and (0 < (limit - (tr["Сумма операции"] % divider)) < limit)
+        ]
+        return round(float(sum(investments)), 2)
+
+    except (KeyError, AssertionError, TypeError) as ex:
         logger.error(f"Ошибка получение  сумму, которую нужно отложить в «Инвесткопилку»: {ex}")
         return 0.00
 
@@ -145,7 +145,7 @@ def search_by_name(transactions: list[dict]) -> str:
         ]
         logger.info(f"Получение транзакции:  {results}")
         return json.dumps(results, ensure_ascii=False, indent=4)
-    except (JSONDecodeError,ValueError,TypeError) as ex:
+    except (JSONDecodeError,ValueError,TypeError,AssertionError,KeyError) as ex:
         logger.error(f"Ошибка получение транзакции : {ex}")
         return ""
 
@@ -157,26 +157,23 @@ if __name__ == "__main__":
     # print(type(json_dict))
     data = [
         {
-            "Дата операции": "2021-6-12",
-            "Сумма операции": 345.96,
+            "Дата операции": "05.12.2021 16:42:04",
+            "Сумма операции с округлением": 345.96,
             "Категория": "Пере",
-            "описании": "Валерий А."
         },
         {
-            "Дата операции.": "2021-05-2",
-            "Сумма операции": 100,
+            "Дата операции": "12.12.2021 16:32:04",
+            "Сумма операции с округлением": 100,
             "Категория": "Переводы",
-            "описании": "Тинькофф Мобайл +7 995 555-55-55 ",
         },
         {
-            "Дата операции": "2021-05-13",
-            "Сумма операции": 134.14,
+            "Дата операции": "31.12.2021 12:12:04",
+            "Сумма операции с округлением": 134.14,
             "Категория": "Переводы",
-            "описании": "Тинькофф Валерий А. Мобайл +7 995 555-55-55 ",
         },
     ]
-    # print(investment_bank("2021-05", data, 10))
+    # print(investment_bank("2021-05", data, 100))
     # print(simple_search("6", data))
-    print(search_by_name(data))
+    # print(search_by_name(data))
 
-    # print(type(raised_cashback_for_categories(trans, 2021, 5)))
+    print(raised_cashback_for_categories(data, 2021, 12))
