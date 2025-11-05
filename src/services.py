@@ -51,7 +51,7 @@ def raised_cashback_for_categories(transactions: list[dict], year: int, month: i
         return json.dumps(datas, ensure_ascii=False, indent=4)
     except (ValueError, KeyError,TypeError,JSONDecodeError) as ex:
         logger.error(f"Ошибка получение JSON с анализом  кешбэка: {ex}")
-        return "some"
+        return ""
 
 
 def investment_bank(month: str, transactions: List[Dict[str, Any]], limit: int) -> float:

@@ -3,6 +3,7 @@ import json
 import pytest
 
 from src.services import investment_bank
+from src.services import raised_cashback_for_categories
 from src.services import search_by_name
 from src.services import search_by_phonenumber
 from src.services import simple_search
@@ -71,3 +72,13 @@ def test_investment_bank(data_for_search: list[dict], limit: int, expected: floa
 
 def test_investment_bank_invalid() -> None:
     assert investment_bank("2021-05", [{}], 10) == 0.00
+
+
+def test_raised_cashback_for_categories(data_for_cashback: list[dict]) -> None:
+    data = {"Пере": 3.46, "Переводы": 2.34}
+    expected = json.dumps(data, ensure_ascii=False, indent=4)
+    assert raised_cashback_for_categories(data_for_cashback, 2021, 12) == expected
+
+
+def test_raised_cashback_for_categories_invalid() -> None:
+    assert raised_cashback_for_categories([{}], 2021, 12) == ""
