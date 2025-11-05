@@ -8,6 +8,7 @@ from typing import Dict
 from typing import List
 
 import pandas as pd
+from black import JSONDecodeError
 
 directory_name = Path(__file__).resolve().parent.parent
 log_path = os.path.join(directory_name, "logs", "services.log")
@@ -114,18 +115,13 @@ def search_by_phonenumber(transactions: list[dict]) -> str:
     :param transactions: транзакции в формате списка словарей
     :return: JSON - ответ с транзакциями
     """
-    try:
-        logger.info("Поиск транзакции по номеу телефона")
-        pattern = r"\+\d{1} \d{3} \d{2,3}(-\d{2}){2}"
 
-        results = [trans for trans in transactions if re.search(pattern, str(trans), flags=re.IGNORECASE)]
-        if not results:
-            raise Exception
-        logger.info(f"Получение транзакции:  {results}")
-        return json.dumps(results, ensure_ascii=False, indent=4)
-    except Exception as ex:
-        logger.error(f"Ошибка получение транзакции : {ex}")
-        return ""
+    logger.info("Поиск транзакции по номеу телефона")
+    pattern = r"\+\d{1} \d{3} \d{2,3}(-\d{2}){2}"
+
+    results = [trans for trans in transactions if re.search(pattern, str(trans), flags=re.IGNORECASE)]
+    logger.info(f"Получение транзакции:  {results}")
+    return json.dumps(results, ensure_ascii=False, indent=4)
 
 
 def search_by_name(transactions: list[dict]) -> str:
@@ -147,11 +143,9 @@ def search_by_name(transactions: list[dict]) -> str:
             for trans in transactions
             if (trans["Категория"] == "Переводы") and (re.search(pattern, trans["описании"], flags=re.IGNORECASE))
         ]
-        if not results:
-            raise Exception
         logger.info(f"Получение транзакции:  {results}")
         return json.dumps(results, ensure_ascii=False, indent=4)
-    except Exception as ex:
+    except (JSONDecodeError,ValueError,TypeError) as ex:
         logger.error(f"Ошибка получение транзакции : {ex}")
         return ""
 
@@ -182,7 +176,7 @@ if __name__ == "__main__":
         },
     ]
     # print(investment_bank("2021-05", data, 10))
-    print(simple_search("6", data))
-    print(search_by_name(data))
+    # print(simple_search("6", data))
+    print(search_by_phonenumber(data))
 
     # print(type(raised_cashback_for_categories(trans, 2021, 5)))
