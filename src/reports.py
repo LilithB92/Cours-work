@@ -3,7 +3,6 @@ import json
 import logging
 import os
 from functools import wraps
-from itertools import groupby
 from pathlib import Path
 from typing import Any
 from typing import Callable
@@ -55,7 +54,8 @@ def log(filename: str = "user_settings") -> Callable[..., Any]:
 
     return wrapper
 
-def filtered_by_date(df: pd.DataFrame, date:Optional[str] = None)->pd.DataFrame:
+
+def filtered_by_date(df: pd.DataFrame, date: Optional[str] = None) -> pd.DataFrame:
     """
     Функция принимает датафрейм с транзакциями, категории, дату.
     Функция филтрует транзакции за последние три месяца (от переданной даты
@@ -76,7 +76,6 @@ def filtered_by_date(df: pd.DataFrame, date:Optional[str] = None)->pd.DataFrame:
     return filtered_by_date
 
 
-
 def spending_by_category(df: pd.DataFrame, category: str, date: Optional[str] = None) -> pd.DataFrame:
     """
     Функция принимает датафрейм с транзакциями, категории, дату.
@@ -89,7 +88,7 @@ def spending_by_category(df: pd.DataFrame, category: str, date: Optional[str] = 
     :return: траты по заданной категории за последние три месяца (от переданной даты)
     """
     try:
-        date_df = filtered_by_date(df,date)
+        date_df = filtered_by_date(df, date)
         filter_category = date_df[date_df["Категория"] == category]
         logger.info("получение траты по заданной категории за последние три месяца")
         return filter_category[["Дата платежа", "Категория", "Сумма платежа"]]
@@ -97,7 +96,8 @@ def spending_by_category(df: pd.DataFrame, category: str, date: Optional[str] = 
         logger.error(f"Ошибка получение траты по заданной категории за последние три месяца: {ex}")
         return pd.DataFrame()
 
-def spending_by_weekday(df: pd.DataFrame, date: Optional[str] = None) -> pd.DataFrame:
+
+def spending_by_weekday(df: pd.DataFrame, date: Optional[str] = None) -> str:
     """
      Функция принимает датафрейм с транзакциями,  дату.
     Функция возвращает средние траты в каждый из дней недели за последние три месяца (от переданной даты)
@@ -107,29 +107,18 @@ def spending_by_weekday(df: pd.DataFrame, date: Optional[str] = None) -> pd.Data
     :param date:опциональную дату в формате 'dd.mm.YYYY'
     :return: Функция возвращает средние траты в каждый из дней недели за последние три месяца (от переданной даты)
     """
+    filter_df = filtered_by_date(df, date)
+    weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     data = []
-    filter_df = filtered_by_date(df,date)
-    weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    # filter_df['weekday'] = filter_df['Дата платежа'].dt.day_name()
-    # new_df = filter_df[['Дата платежа','weekday','Сумма платежа']]
-    # new = new_df.groupby('weekday')['Сумма платежа']
-    #
-    #
-    # # filter_df.loc[filter_df['Дата платежа'], 'weekday'] = filter_df['Дата платежа'].dt.day_name()
-    #
-    # # for weekday in weekdays:
-    # #
-    # #     filtered = filter_df[filter_df['Дата платежа'].dt.day_name() == weekday]
-    # #     # if filtered:
-    # #     #     data.appened({weekday: float(filtered['"Сумма платежа"'].mean())})
-    #
-    #
-    # # print(filter_df['Дата платежа'].dt.day_name() == "Sunday")
-    # return new
+    for weekday in weekdays:
+        filter_by_weekday = filter_df[filter_df["Дата платежа"].dt.day_name() == weekday]
+        avg_amount = filter_by_weekday["Сумма платежа"].mean()
 
+        data.append({weekday: round(float(avg_amount), 2)})
+    return json.dumps(data, ensure_ascii=False, indent=4)
 
 
 if __name__ == "__main__":
     dtf = read_excel("operations")
-    print(spending_by_category(dtf,"Супермаркеты",'21.03.2021' ))
-    print(spending_by_weekday(dtf,'21.03.2021' ))
+    # print(spending_by_category(dtf,"Супермаркеты",'21.03.2021' ))
+    print(spending_by_weekday(dtf, "21.03.2021"))
