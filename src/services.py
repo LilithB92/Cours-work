@@ -166,7 +166,7 @@ if __name__ == "__main__":
             "Дата операции.": "2021-05-2",
             "Сумма операции": 100,
             "Категория": "Переводы",
-            "описании": "Тинькофф Мобайл +7 995 555-55-55 А. Сергей З.",
+            "описании": "Тинькофф Мобайл +7 995 555-55-55 ",
         },
         {
             "Дата операции": "2021-05-13",
@@ -177,6 +177,6 @@ if __name__ == "__main__":
     ]
     # print(investment_bank("2021-05", data, 10))
     # print(simple_search("6", data))
-    print(search_by_phonenumber(data))
+    print(search_by_name(data))
 
     # print(type(raised_cashback_for_categories(trans, 2021, 5)))
