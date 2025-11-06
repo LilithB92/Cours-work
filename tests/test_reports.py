@@ -1,4 +1,5 @@
 import datetime
+import json
 
 import pandas as pd
 import pytest
@@ -7,6 +8,7 @@ from pandas._testing import assert_frame_equal
 from src.reports import filtered_by_date
 from src.reports import spending_by_category
 from src.reports import spending_by_weekday
+from src.reports import spending_by_workday
 
 
 def test_filtered_by_date(reports_tests_data: pd.DataFrame) -> None:
@@ -44,3 +46,14 @@ def test_spending_by_weekday(reports_tests_data: pd.DataFrame, weekday_spending_
 
 def test_spending_by_weekday_invalid() -> None:
     assert spending_by_weekday(pd.DataFrame(), "23.04.2021") == ""
+
+
+def test_spending_by_workday(reports_tests_data: pd.DataFrame, weekday_spending_expected: str) -> None:
+    weekday_expected = json.loads(weekday_spending_expected)
+    data = {"рабочий день": weekday_expected[:5], "выходной день": weekday_expected[5:]}
+    expected = json.dumps(data, ensure_ascii=False, indent=4)
+    assert spending_by_workday(reports_tests_data, "23.04.2021") == expected
+
+
+def test_spending_by_workday_invalid() -> None:
+    assert spending_by_workday(pd.DataFrame(), "23.04.2021") == ""

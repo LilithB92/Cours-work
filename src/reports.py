@@ -169,4 +169,4 @@ if __name__ == "__main__":
 
     # print(spending_by_category(dtf, "Каршеринг", "23.04.2021"))
     # print(filtered_by_date(dtf,'23.04.2021'))
-    print(spending_by_weekday(dtf, "23.04.2021"))
+    print(spending_by_workday(dtf, "23.04.2021"))
