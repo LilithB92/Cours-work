@@ -32,9 +32,6 @@ def test_filtered_by_date_invalide() -> None:
         assert filtered_by_date(pd.DataFrame(), "23.04.2021")
 
 
-def test_spending_by_category_invalid()->None:
+def test_spending_by_category_invalid() -> None:
     with pytest.raises(ValueError):
         assert spending_by_category(pd.DataFrame(), "23.04.2021")
-
-
-
