@@ -120,7 +120,7 @@ def spending_by_weekday(df: pd.DataFrame, date: Optional[str] = None) -> str:
             data.append({weekday: round(float(avg_amount), 2)})
         logger.info(f"получение средние траты в каждый из дней недели за последние три месяца: {data}")
         return json.dumps(data, ensure_ascii=False, indent=4)
-    except (KeyError, JSONDecodeError, TypeError, AssertionError) as ex:
+    except (KeyError, JSONDecodeError, TypeError, AssertionError, NameError) as ex:
         logger.error(f"Ошибка получение средние траты в каждый из дней недели за последние три месяца : {ex}")
         return ""
 
@@ -167,6 +167,6 @@ if __name__ == "__main__":
 
     dtf = pd.DataFrame(data)
 
-    print(spending_by_category(dtf, "Каршеринг", "23.04.2021"))
+    # print(spending_by_category(dtf, "Каршеринг", "23.04.2021"))
     # print(filtered_by_date(dtf,'23.04.2021'))
-    # print(spending_by_weekday(dtf, "10.05.2021"))
+    print(spending_by_weekday(dtf, "23.04.2021"))

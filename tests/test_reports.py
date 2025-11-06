@@ -6,6 +6,7 @@ from pandas._testing import assert_frame_equal
 
 from src.reports import filtered_by_date
 from src.reports import spending_by_category
+from src.reports import spending_by_weekday
 
 
 def test_filtered_by_date(reports_tests_data: pd.DataFrame) -> None:
@@ -35,3 +36,11 @@ def test_filtered_by_date_invalide() -> None:
 def test_spending_by_category_invalid() -> None:
     with pytest.raises(ValueError):
         assert spending_by_category(pd.DataFrame(), "23.04.2021")
+
+
+def test_spending_by_weekday(reports_tests_data: pd.DataFrame, weekday_spending_expected: str) -> None:
+    assert spending_by_weekday(reports_tests_data, "23.04.2021") == weekday_spending_expected
+
+
+def test_spending_by_weekday_invalid() -> None:
+    assert spending_by_weekday(pd.DataFrame(), "23.04.2021") == ""

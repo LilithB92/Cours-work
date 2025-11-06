@@ -1,7 +1,9 @@
 import datetime
+import json
 
 import pandas as pd
 import pytest
+from numpy import nan
 
 
 @pytest.fixture
@@ -133,3 +135,17 @@ def reports_tests_data() -> pd.DataFrame:
         },
     ]
     return pd.DataFrame(data)
+
+
+@pytest.fixture
+def weekday_spending_expected() -> str:
+    data = [
+        {"Monday": nan},
+        {"Tuesday": nan},
+        {"Wednesday": nan},
+        {"Thursday": nan},
+        {"Friday": nan},
+        {"Saturday": 222.98},
+        {"Sunday": nan},
+    ]
+    return json.dumps(data, ensure_ascii=False, indent=4)
