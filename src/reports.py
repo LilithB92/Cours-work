@@ -12,8 +12,6 @@ from typing import Optional
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
-from src.utils import read_excel
-
 directory_name = Path(__file__).resolve().parent.parent
 log_path = os.path.join(directory_name, "logs", "reports.log")
 
@@ -75,7 +73,6 @@ def filtered_by_date(df: pd.DataFrame, date: Optional[str] = None) -> pd.DataFra
         logger.info(f"получение даты: {dt}")
         past_datetime = dt - relativedelta(months=3)
         filtered_by_date = df[(df["Дата платежа"] >= past_datetime) & (df["Дата платежа"] <= dt)]
-
         return filtered_by_date
     except (KeyError, TypeError, AssertionError) as ex:
         logger.error(f"Ошибка получение транзакции за последние три месяца : {ex}")
@@ -120,8 +117,6 @@ def spending_by_weekday(df: pd.DataFrame, date: Optional[str] = None) -> str:
         for weekday in weekdays:
             filter_by_weekday = filter_df[filter_df["Дата платежа"].dt.day_name() == weekday]
             avg_amount = filter_by_weekday["Сумма платежа"].mean()
-            if avg_amount:
-                avg_amount = 0.00
             data.append({weekday: round(float(avg_amount), 2)})
         logger.info(f"получение средние траты в каждый из дней недели за последние три месяца: {data}")
         return json.dumps(data, ensure_ascii=False, indent=4)
@@ -151,6 +146,27 @@ def spending_by_workday(df: pd.DataFrame, date: Optional[str] = None) -> str:
 
 
 if __name__ == "__main__":
-    dtf = read_excel("operations")
-    # print(spending_by_category(dtf,"Супермаркеты",'21.03.2021' ))
-    print(spending_by_workday(dtf, "21.03.2026"))
+    # dtf = read_excel("operations")
+    data = [
+        {
+            "Дата платежа": datetime.datetime.strptime("17.04.2021 16:44:00", "%d.%m.%Y %H:%M:%S"),
+            "Сумма платежа": 345.96,
+            "Категория": "Пере",
+        },
+        {
+            "Дата платежа": datetime.datetime.strptime("10.04.2021 16:44:00", "%d.%m.%Y %H:%M:%S"),
+            "Сумма платежа": 100,
+            "Категория": "Каршеринг",
+        },
+        {
+            "Дата платежа": datetime.datetime.strptime("11.05.2021 16:44:00", "%d.%m.%Y %H:%M:%S"),
+            "Сумма платежа": 134.14,
+            "Категория": "Каршеринг",
+        },
+    ]
+
+    dtf = pd.DataFrame(data)
+
+    print(spending_by_category(dtf, "Каршеринг", "23.04.2021"))
+    # print(filtered_by_date(dtf,'23.04.2021'))
+    # print(spending_by_weekday(dtf, "10.05.2021"))
