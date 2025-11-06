@@ -1,11 +1,15 @@
 import datetime
 import json
+import os
+from pathlib import Path
+from typing import NoReturn
 
 import pandas as pd
 import pytest
 from pandas._testing import assert_frame_equal
 
 from src.reports import filtered_by_date
+from src.reports import log_json_data
 from src.reports import spending_by_category
 from src.reports import spending_by_weekday
 from src.reports import spending_by_workday
@@ -57,3 +61,36 @@ def test_spending_by_workday(reports_tests_data: pd.DataFrame, weekday_spending_
 
 def test_spending_by_workday_invalid() -> None:
     assert spending_by_workday(pd.DataFrame(), "23.04.2021") == ""
+
+
+def test_log_json_data_decorator_writes_correct_content() -> None:
+    """Tests if the decorator correctly writes the function's result to the file."""
+    filename = "test_log"
+
+    @log_json_data(filename)
+    def my_function(x: int, y: int) -> int:
+        return x + y
+
+    expected_result = 5
+    actual_result = my_function(2, 3)
+
+    assert actual_result == expected_result
+    directory_name = Path(__file__).resolve().parent.parent
+    user_settings_file = os.path.join(directory_name, filename + ".json")
+    with open(user_settings_file, "r") as f:
+        content = f.read()
+
+    expected_log_entry = f"{expected_result}"
+    assert expected_log_entry in content
+
+
+def test_log_to_file_decorator_invalid() -> None:
+    """Tests if the decorator correctly writes the function's result to the file."""
+    filename = "test_log"
+
+    @log_json_data(filename)
+    def my_function() -> NoReturn:
+        raise AssertionError
+
+    with pytest.raises(AssertionError):
+        assert my_function() == ""

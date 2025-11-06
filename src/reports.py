@@ -26,7 +26,7 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 
-def log(filename: str = "user_settings") -> Callable[..., Any]:
+def log_json_data(filename: str = "user_settings") -> Callable[..., Any]:
     """
     Декоратор  результат  функции сохраняет в файл.
 
@@ -45,7 +45,7 @@ def log(filename: str = "user_settings") -> Callable[..., Any]:
                 with open(user_settings_file, "w", encoding="utf-8") as file:
                     json.dump(result, file)
                 return result
-            except Exception as ex:
+            except AssertionError as ex:
                 logger.error(f"Ошибка сохранение результат функции в файл: {ex}")
                 return "file have not saved"
 
@@ -143,30 +143,3 @@ def spending_by_workday(df: pd.DataFrame, date: Optional[str] = None) -> str:
         return json.dumps(result, ensure_ascii=False, indent=4)
     logger.error("Ошибка получение  средние траты в рабочий и в выходной день за последние три месяца")
     return ""
-
-
-if __name__ == "__main__":
-    # dtf = read_excel("operations")
-    data = [
-        {
-            "Дата платежа": datetime.datetime.strptime("17.04.2021 16:44:00", "%d.%m.%Y %H:%M:%S"),
-            "Сумма платежа": 345.96,
-            "Категория": "Пере",
-        },
-        {
-            "Дата платежа": datetime.datetime.strptime("10.04.2021 16:44:00", "%d.%m.%Y %H:%M:%S"),
-            "Сумма платежа": 100,
-            "Категория": "Каршеринг",
-        },
-        {
-            "Дата платежа": datetime.datetime.strptime("11.05.2021 16:44:00", "%d.%m.%Y %H:%M:%S"),
-            "Сумма платежа": 134.14,
-            "Категория": "Каршеринг",
-        },
-    ]
-
-    dtf = pd.DataFrame(data)
-
-    # print(spending_by_category(dtf, "Каршеринг", "23.04.2021"))
-    # print(filtered_by_date(dtf,'23.04.2021'))
-    print(spending_by_workday(dtf, "23.04.2021"))
