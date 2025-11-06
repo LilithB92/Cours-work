@@ -94,7 +94,7 @@ def spending_by_category(df: pd.DataFrame, category: str, date: Optional[str] = 
         date_df = filtered_by_date(df, date)
         filter_category = date_df[date_df["Категория"] == category]
         logger.info("получение траты по заданной категории за последние три месяца")
-        return filter_category[["Дата платежа", "Категория", "Сумма платежа"]]
+        return filter_category[["Дата платежа", "Сумма платежа", "Категория"]]
     except Exception as ex:
         logger.error(f"Ошибка получение траты по заданной категории за последние три месяца: {ex}")
         return pd.DataFrame()
