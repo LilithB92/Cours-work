@@ -49,7 +49,7 @@ def raised_cashback_for_categories(transactions: list[dict], year: int, month: i
                 continue
             datas[category] = round(float(sum_amount_by_category[category]) / 100, 2)
         return json.dumps(datas, ensure_ascii=False, indent=4)
-    except (ValueError, KeyError,TypeError,JSONDecodeError) as ex:
+    except (ValueError, KeyError, TypeError, JSONDecodeError) as ex:
         logger.error(f"Ошибка получение JSON с анализом  кешбэка: {ex}")
         return ""
 
@@ -145,7 +145,7 @@ def search_by_name(transactions: list[dict]) -> str:
         ]
         logger.info(f"Получение транзакции:  {results}")
         return json.dumps(results, ensure_ascii=False, indent=4)
-    except (JSONDecodeError,ValueError,TypeError,AssertionError,KeyError) as ex:
+    except (JSONDecodeError, ValueError, TypeError, AssertionError, KeyError) as ex:
         logger.error(f"Ошибка получение транзакции : {ex}")
         return ""
 

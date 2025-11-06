@@ -75,7 +75,7 @@ def read_excel(filename: str) -> pd.DataFrame:
         logger.info("Открываем Excel-файл с данными о финансовых транзакциях и вернет DataFrame")
         excel_data = pd.read_excel(excel_file, engine="openpyxl")
         return excel_data
-    except (FileNotFoundError, ValueError, AttributeError ) as ex:
+    except (FileNotFoundError, ValueError, AttributeError) as ex:
         logger.error(f"Произошла ошибка: {ex}")
         return pd.DataFrame()
 
@@ -194,4 +194,3 @@ if __name__ == "__main__":
     # print(stoke_price())
     # print(get_race_currency())
     # print(get_each_cards_datas(trans))
-
